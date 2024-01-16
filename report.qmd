@@ -1,0 +1,106 @@
+---
+title: "Analysis of DineSafe Infractions and Inspections in Toronto Canada"
+subtitle: "Categorical Analysis with Graphing in R"
+author:
+  - Francesca Ye
+email: francesca.ye@mail.utoronto.ca
+prerequisites: "Dataset taken from opensourcetoronto and can be found here: https://open.toronto.ca/dataset/dinesafe/"
+date: January 16 2024 
+date-format: long
+abstract: "This report analyzes the amount of DineSafe infractions by severity level in addition to the number of establishments by DineSafe status and the frequency of inspections. In order to gain an idea of the statistics of DineSafe, bar graphs were created in order to visualize the DineSafe status of establishments, the minimum amount of inspections per year for an individual establishment, and the frequency of DineSafe infractions by severity awarded. Based off the graphs created, establishments are generally more likely to be subject to 2-3 inspections per year and a majority of infractions are of minor severity. This might relate to the signficantly higher amount of DineSafe pass statuses in comparison to condition pass statuses."
+format: pdf
+number-sections: true
+bibliography: references.bib
+---
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+# install.packages("opendatatoronto")
+# install.packages("janitor")
+# install.packages("tidyverse")
+# install.packages ("dplyr")
+
+library(tidyverse)
+library(janitor)
+library(dplyr)
+library(opendatatoronto)
+dinesafe_package <- show_package("ea1d6e57-87af-4e23-b722-6c1f5aa18a8d")
+
+resources <- list_package_resources("ea1d6e57-87af-4e23-b722-6c1f5aa18a8d")
+	
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+raw_dinesafe_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+
+cleaned_dinesafe_data <-
+  clean_names(raw_dinesafe_data)
+```
+
+# Introduce 
+DineSafe is Toronto Public Health's food safety program which primarily inspects establishments that serve and prepare food. After an inspection, establishments are given a pass, conditional pass, or closed status. After inspections, establishments are also given infractions of varying severity levels that are recorded. Depending on the severity level, infractions are corrected on-site, with a fine or another method. This particular report examines the DineSafe status of establishments, the minimum amount of inspections per year for an individual establishment, and the frequency of DineSafe infractions by severity awarded. This data was imported into Posit Cloud where the R statistical programming language [@citeR] was used in addition to the janitor [@janitor], tidyverse [@tidyverse], and dplyr [@dplyr] packages for cleaning. Graphs were created based on the cleaned data. 
+
+# Data
+The data set that was selected for the purpose of this report's graphical analysis is a package data set entitled "Dinesafe" from Open Data Toronto by [@opensourcetoronto]. This data set includes 17 different variables including minimum amount of inspections per year, infraction severity, and establishment DineSafe status. These three particular variables will be used to creates the required graphs and are defined as follows:
+
+Severity (ascedning order): Not Applicable, Minor, Significant, Crucial
+
+Establishment Status: Pass, Conditional Pass, Closed
+
+Minimum Amount of Inspections per Year: 1-3 inspections per year based on establishment type, food preparation processes, volume and type of food served, etc. Low risk premises are noted as "O" in this data set as they only require 1 inspection eveyr two years due to only selling pre-packaged non-hazardous food. 
+
+```{r}
+#| label: severity-graph
+#| fig-cap: Number of DineSafe Infractions by Severity
+#| echo: false
+#| 
+graph_order <- c("M - Minor", "S - Significant", "C - Crucial", "NA - Not Applicable")
+cleaned_dinesafe_data |>
+  filter(severity != "") %>%
+  ggplot(aes(x = severity)) +
+  scale_x_discrete(limits = graph_order) +
+  geom_bar() +
+  theme_minimal() +
+  labs(x = "Type of DineSafe Infraction", y = "Number of Occurrences") +
+  scale_y_continuous(name = "Number of Occurrences", n.breaks = 10)
+```
+
+The number of occurrences of each DineSafe infraction by severity level is visualized with a bar graph. Based on this graph, there are significantly less crucial infractions levied to establishments in comparison to minor and significant infractions @severity-graph. Most infractions appear to be minor and according to this data set, are corrected with on-site verbal instruction. This could indicate that infractions are not severe enough to warrant a closed status at the end of an inspection. 
+
+
+```{r}
+#| label: establishment-status-graph
+#| fig-cap: Amount of Establishments with Conditional Pass or Pass DineSafe Status'
+#| echo: false
+cleaned_dinesafe_data |>
+  ggplot(aes(x = establishment_status)) +
+  geom_bar() +
+  theme_minimal() +
+  labs(x = "Establishment DineSafe Status", y = "Number of Establishments") +
+  scale_y_continuous(name = "Number of Establishments", n.breaks = 10)
+```
+
+The number of establishments with a pass or conditional pass status are visualized with a bar graph. Based on the graph created, almost all establishments are given a pass status @establishment-status-graph. There is also a small portion of establishments with a conditional pass status and none with a closed status. Comparing this graph to the infraction severity graph @severity-graph, these results could strongly imply that most establishments meet the standards set out by Public Health Toronto since infractions are generally minor and most establishments have a pass status. 
+
+```{r}
+#| label: min-inspections-graph
+#| fig-cap: Amount of Establishments Sorted by the Minimum Amount of Inspections per Year
+#| echo: false
+cleaned_dinesafe_data |>
+  ggplot(aes(x = min_inspections_per_year)) +
+  geom_bar() +
+  theme_minimal() +
+  labs(x = "Minimum Amount of Inspections per Year", y = "Number of Establishments") +
+  scale_y_continuous(name = "Number of Establishments", n.breaks = 10)
+```
+
+The number of establishments that are subject to each minimum inspection amount per year value are visualized with a bar graph. From viewing this graph, significantly fewer amounts of establishments are subject to 1 inspection per year or 1 inspection every two years @min-inspections-graph. Since most establishments are subject to multiple inspections per year (2-3), this could imply they are more likely to adhere to Toronto Public Health guidelines due to rigorous inspection practices. 
+
+# Discussion and Conclusion
+
+Based on the graphs created from the "Dinesafe" data set taken from Open Source Toronto @opendatatoronto, it is possible that there is correlation between the minimum amount of inspections establishments are subject to and the amount of pass stauses for establishments. This could possibly be due to more inspections per year resulting in better adherence to Toronto Public Health standards which contribute to a majority of establishments being given pass status. This could also be further corroborated by the frequency of each infraction severity level. As most infractions are minor and with few crucial infractions, this also highlights how guidelines not being met are easily rectified. Infractions being mostly minor could also imply that across Toronto, establishments are operating at standards similar to those set out by Toronto Public Health. 
+
+# References
+
+
