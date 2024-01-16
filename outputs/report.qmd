@@ -38,7 +38,7 @@ cleaned_dinesafe_data <-
   clean_names(raw_dinesafe_data)
 ```
 
-# Introduce 
+# Introduction
 DineSafe is Toronto Public Health's food safety program which primarily inspects establishments that serve and prepare food. After an inspection, establishments are given a pass, conditional pass, or closed status. After inspections, establishments are also given infractions of varying severity levels that are recorded. Depending on the severity level, infractions are corrected on-site, with a fine or another method. This particular report examines the DineSafe status of establishments, the minimum amount of inspections per year for an individual establishment, and the frequency of DineSafe infractions by severity awarded. This data was imported into Posit Cloud where the R statistical programming language [@citeR] was used in addition to the janitor [@janitor], tidyverse [@tidyverse], and dplyr [@dplyr] packages for cleaning. Graphs were created based on the cleaned data. 
 
 # Data
