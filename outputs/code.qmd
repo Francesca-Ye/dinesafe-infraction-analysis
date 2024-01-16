@@ -1,0 +1,64 @@
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+# install.packages("opendatatoronto")
+# install.packages("janitor")
+# install.packages("tidyverse")
+# install.packages ("dplyr")
+
+library(tidyverse)
+library(janitor)
+library(dplyr)
+library(opendatatoronto)
+dinesafe_package <- show_package("ea1d6e57-87af-4e23-b722-6c1f5aa18a8d")
+
+resources <- list_package_resources("ea1d6e57-87af-4e23-b722-6c1f5aa18a8d")
+	
+datastore_resources <- filter(resources, tolower(format) %in% c('csv', 'geojson'))
+
+raw_dinesafe_data <- filter(datastore_resources, row_number()==1) %>% get_resource()
+
+cleaned_dinesafe_data <-
+  clean_names(raw_dinesafe_data)
+```
+
+```{r}
+#| label: severity-graph
+#| fig-cap: Number of DineSafe Infractions by Severity
+#| echo: false
+#| 
+graph_order <- c("M - Minor", "S - Significant", "C - Crucial", "NA - Not Applicable")
+cleaned_dinesafe_data |>
+  filter(severity != "") %>%
+  ggplot(aes(x = severity)) +
+  scale_x_discrete(limits = graph_order) +
+  geom_bar() +
+  theme_minimal() +
+  labs(x = "Type of DineSafe Infraction", y = "Number of Occurrences") +
+  scale_y_continuous(name = "Number of Occurrences", n.breaks = 10)
+```
+
+```{r}
+#| label: establishment-status-graph
+#| fig-cap: Amount of Establishments with Conditional Pass or Pass DineSafe Status'
+#| echo: false
+cleaned_dinesafe_data |>
+  ggplot(aes(x = establishment_status)) +
+  geom_bar() +
+  theme_minimal() +
+  labs(x = "Establishment DineSafe Status", y = "Number of Establishments") +
+  scale_y_continuous(name = "Number of Establishments", n.breaks = 10)
+```
+
+```{r}
+#| label: min-inspections-graph
+#| fig-cap: Amount of Establishments Sorted by the Minimum Amount of Inspections per Year
+#| echo: false
+cleaned_dinesafe_data |>
+  ggplot(aes(x = min_inspections_per_year)) +
+  geom_bar() +
+  theme_minimal() +
+  labs(x = "Minimum Amount of Inspections per Year", y = "Number of Establishments") +
+  scale_y_continuous(name = "Number of Establishments", n.breaks = 10)
+```
